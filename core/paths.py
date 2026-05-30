@@ -10,7 +10,7 @@ from core.dates import parse_compact_register_date
 
 PDF_REGISTER_RE = re.compile(
     r"^Реєстр\s+(?P<kind>Закупівлі|Закупівель|Продажу|Продажів)\s+"
-    r"(?P<start>\d{6}|\d{8})-(?P<end>\d{6}|\d{8})\.pdf$",
+    r"(?P<start>\d{4}|\d{6}|\d{8})-(?P<end>\d{4}|\d{6}|\d{8})\.pdf$",
     flags=re.IGNORECASE,
 )
 
@@ -51,6 +51,15 @@ def find_existing_registers_dir(project_dir: Path) -> Path:
         "а не Desktop, AccountingPro або інша папка."
     )
 
+def find_existing_child_dir(project_dir: Path, folder_name: str) -> Path:
+    project_dir = project_dir.expanduser().resolve()
+    wanted = _norm_folder_name(folder_name)
+    if project_dir.exists():
+        for child in project_dir.iterdir():
+            if child.is_dir() and _norm_folder_name(child.name) == wanted:
+                return child
+    return project_dir / folder_name
+
 @dataclass
 class ProjectPaths:
     project_dir: Path
@@ -64,11 +73,11 @@ class ProjectPaths:
 
     @property
     def profit_dir(self) -> Path:
-        return self.project_dir / DEFAULT_PROFIT_DIR
+        return find_existing_child_dir(self.project_dir, DEFAULT_PROFIT_DIR)
 
     @property
     def accounting_report_dir(self) -> Path:
-        return self.project_dir / DEFAULT_ACCOUNTING_REPORT_DIR
+        return find_existing_child_dir(self.project_dir, DEFAULT_ACCOUNTING_REPORT_DIR)
 
     @property
     def accounting_table(self) -> Path:

@@ -1,7 +1,7 @@
 import json
 import math
 import time
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Dict, Iterable, Optional
 
@@ -96,6 +96,9 @@ def fetch_nbp_rates(start: date, end: date, cache_path: Path) -> Dict[date, floa
     Returns mapping: rate_date -> EUR/PLN mid rate.
     """
     cached = load_cache(cache_path)
+    cached_dates = [datetime.fromisoformat(k).date() for k in cached]
+    if cached_dates and min(cached_dates) <= start and max(cached_dates) >= end:
+        return {datetime.fromisoformat(k).date(): v for k, v in cached.items()}
 
     for chunk_start, chunk_end in date_chunks(start, end):
         # We fetch a chunk when at least one calendar date in that chunk is not cached.

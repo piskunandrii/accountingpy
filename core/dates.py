@@ -2,6 +2,8 @@ import re
 from datetime import date, datetime, timedelta
 from typing import Iterable
 
+import pandas as pd
+
 def to_date(value) -> date:
     if pd.isna(value):
         raise ValueError("Missing Date of issue")
@@ -42,10 +44,19 @@ def get_last_date(value: str):
 def parse_compact_register_date(value: str, *, is_start: bool) -> date:
     """
     Supports:
+      MMYY     -> first/last day of the month in 20YY depending on is_start
       MMYYYY   -> first/last day of the month depending on is_start
       DDMMYYYY -> exact day
     """
     value = value.strip()
+    if len(value) == 4:
+        month = int(value[:2])
+        year = 2000 + int(value[2:])
+        if is_start:
+            return date(year, month, 1)
+        if month == 12:
+            return date(year, 12, 31)
+        return date(year, month + 1, 1) - timedelta(days=1)
     if len(value) == 6:
         month = int(value[:2])
         year = int(value[2:])

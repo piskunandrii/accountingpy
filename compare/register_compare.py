@@ -3,7 +3,7 @@ from datetime import date
 import re
 import pandas as pd
 
-from core.numbers import clean_doc_number
+from core.numbers import clean_doc_number, float_to_pl_text
 from core.paths import ProjectPaths, parse_register_pdf_filename
 from core.excel_format import write_multi_sheet_excel_openpyxl
 from pdf_tools.pdf_register import extract_pdf_register
@@ -107,7 +107,7 @@ def comparison_output_path(paths: ProjectPaths, pdf_path: Path, parsed: dict) ->
     start = parsed["Period start"].strftime("%Y-%m-%d")
     end = parsed["Period end"].strftime("%Y-%m-%d")
     stem = re.sub(r"[^A-Za-zА-Яа-яІіЇїЄєҐґ0-9_. -]+", "_", pdf_path.stem)
-    return paths.accounting_report_dir / f"Порівняння {kind} {start} - {end} ({stem}).xlsx"
+    return paths.registers_dir / f"Порівняння {kind} {start} - {end} ({stem}).xlsx"
 
 def create_pdf_comparison_workbook(paths: ProjectPaths, pdf_path: Path, log_func=None) -> Path:
     parsed = parse_register_pdf_filename(pdf_path)
